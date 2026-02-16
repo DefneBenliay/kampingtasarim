@@ -52,9 +52,9 @@ const Navbar = () => {
 
                     {/* Desktop Menu */}
                     <div className="hidden md:flex items-center space-x-1">
-                        <NavLink to="/" icon={LayoutGrid}>Home</NavLink>
-                        <NavLink to="/info" icon={FileText}>Info</NavLink>
-                        <NavLink to="/files" icon={FolderOpen}>Files</NavLink>
+                        <NavLink to="/" icon={LayoutGrid}>Anasayfa</NavLink>
+                        <NavLink to="/info" icon={FileText}>Tanıtım</NavLink>
+                        <NavLink to="/files" icon={FolderOpen}>Belgeler</NavLink>
                         {isAdmin && (
                             <NavLink to="/admin/users" icon={Shield}>Admin</NavLink>
                         )}
@@ -66,7 +66,7 @@ const Navbar = () => {
                             className="flex items-center space-x-2 px-5 py-2 rounded-full bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/20 transition-all duration-300 transform hover:scale-105"
                         >
                             <LogOut className="w-4 h-4" />
-                            <span className="text-sm font-medium">Sign Out</span>
+                            <span className="text-sm font-medium">Çıkış Yap</span>
                         </button>
                     </div>
 
@@ -92,9 +92,9 @@ const Navbar = () => {
                         className="md:hidden glass border-t border-white/10 overflow-hidden"
                     >
                         <div className="px-4 pt-2 pb-4 space-y-1">
-                            <Link to="/" className="block px-3 py-3 rounded-lg text-base font-medium text-gray-300 hover:text-white hover:bg-white/10" onClick={() => setIsOpen(false)}>Home</Link>
-                            <Link to="/info" className="block px-3 py-3 rounded-lg text-base font-medium text-gray-300 hover:text-white hover:bg-white/10" onClick={() => setIsOpen(false)}>Info</Link>
-                            <Link to="/files" className="block px-3 py-3 rounded-lg text-base font-medium text-gray-300 hover:text-white hover:bg-white/10" onClick={() => setIsOpen(false)}>Files</Link>
+                            <Link to="/" className="block px-3 py-3 rounded-lg text-base font-medium text-gray-300 hover:text-white hover:bg-white/10" onClick={() => setIsOpen(false)}>Anasayfa</Link>
+                            <Link to="/info" className="block px-3 py-3 rounded-lg text-base font-medium text-gray-300 hover:text-white hover:bg-white/10" onClick={() => setIsOpen(false)}>Tanıtım</Link>
+                            <Link to="/files" className="block px-3 py-3 rounded-lg text-base font-medium text-gray-300 hover:text-white hover:bg-white/10" onClick={() => setIsOpen(false)}>Belgeler</Link>
                             {isAdmin && (
                                 <Link to="/admin/users" className="block px-3 py-3 rounded-lg text-base font-medium text-red-400 hover:bg-red-500/10" onClick={() => setIsOpen(false)}>Admin Panel</Link>
                             )}

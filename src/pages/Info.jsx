@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../components/AuthProvider';
 import Navbar from '../components/Navbar';
-import { Edit, Save, X, Upload, Copy, Image as ImageIcon } from 'lucide-react';
+import { Edit, Save, X, Upload, Copy, Image as ImageIcon, Trash2 } from 'lucide-react';
 
 const Info = () => {
     const { isAdmin } = useAuth();
@@ -54,7 +54,8 @@ const Info = () => {
             // Add to local list of uploaded images for this session
             setUploadedImages(prev => [{
                 name: file.name,
-                url: data.publicUrl
+                url: data.publicUrl,
+                storagePath: filePath
             }, ...prev]);
 
             alert('Resim yüklendi!');
@@ -62,6 +63,27 @@ const Info = () => {
             alert('Yükleme hatası: ' + error.message);
         } finally {
             setUploading(false);
+        }
+    };
+
+    const handleImageDelete = async (image) => {
+        if (!window.confirm('Bu resmi silmek istediğinize emin misiniz?')) return;
+
+        try {
+            // If storagePath is missing (old uploads), we can't easily delete from storage without parsing URL
+            if (image.storagePath) {
+                const { error } = await supabase.storage
+                    .from('images')
+                    .remove([image.storagePath]);
+
+                if (error) throw error;
+            }
+
+            setUploadedImages(prev => prev.filter(img => img.url !== image.url));
+            alert('Resim silindi.');
+        } catch (error) {
+            console.error('Silme hatası:', error);
+            alert('Resim silinirken hata oluştu: ' + error.message);
         }
     };
 
@@ -150,6 +172,13 @@ const Info = () => {
                                                             title="HTML Kodunu Kopyala"
                                                         >
                                                             <Copy className="w-4 h-4" />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleImageDelete(img)}
+                                                            className="p-1.5 hover:bg-red-900/30 rounded text-gray-400 hover:text-red-400 transition-colors"
+                                                            title="Resmi Sil"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
                                                         </button>
                                                     </div>
                                                 </div>

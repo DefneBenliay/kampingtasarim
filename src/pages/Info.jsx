@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../components/AuthProvider';
 import Navbar from '../components/Navbar';
-import { Edit, Save, X } from 'lucide-react';
+import { Edit, Save, X, Upload, Copy, Image as ImageIcon } from 'lucide-react';
 
 const Info = () => {
     const { isAdmin } = useAuth();
@@ -10,6 +10,8 @@ const Info = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [editValue, setEditValue] = useState('');
     const [loading, setLoading] = useState(true);
+    const [uploading, setUploading] = useState(false);
+    const [uploadedImages, setUploadedImages] = useState([]);
 
     useEffect(() => { fetchContent(); }, []);
 
@@ -26,7 +28,46 @@ const Info = () => {
             const { error } = await supabase.from('site_content').upsert({ section: 'info', content: editValue, updated_at: new Date() });
             if (error) throw error;
             setContent(editValue); setIsEditing(false);
-        } catch (error) { alert('Error: ' + error.message); }
+        } catch (error) { alert('Hata: ' + error.message); }
+    };
+
+    const handleImageUpload = async (event) => {
+        try {
+            setUploading(true);
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Math.random()}.${fileExt}`;
+            const filePath = `${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('images')
+                .upload(filePath, file);
+
+            if (uploadError) {
+                throw uploadError;
+            }
+
+            const { data } = supabase.storage.from('images').getPublicUrl(filePath);
+
+            // Add to local list of uploaded images for this session
+            setUploadedImages(prev => [{
+                name: file.name,
+                url: data.publicUrl
+            }, ...prev]);
+
+            alert('Resim yüklendi!');
+        } catch (error) {
+            alert('Yükleme hatası: ' + error.message);
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const copyToClipboard = (text) => {
+        navigator.clipboard.writeText(text);
+        alert('URL kopyalandı!');
     };
 
     if (loading) return (
@@ -41,7 +82,7 @@ const Info = () => {
             <div className="max-w-5xl mx-auto px-4 py-10 mt-16">
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-3xl font-bold text-white tracking-tight">
-                        Bilgilendirme
+                        Tanıtım
                     </h1>
                     {isAdmin && (
                         <button
@@ -70,6 +111,53 @@ const Info = () => {
                                 <div className="p-3 bg-blue-900/30 border border-blue-800 rounded text-sm text-blue-300 mb-4">
                                     <strong>💡 İpucu:</strong> İçeriğinizi HTML etiketleriyle formatlayabilirsiniz (h2, p, ul, img, vb.)
                                 </div>
+
+                                {/* Image Upload Section */}
+                                <div className="mb-6 p-4 bg-gray-900 rounded-lg border border-gray-700">
+                                    <h3 className="text-sm font-semibold text-gray-300 mb-3 flex items-center">
+                                        <ImageIcon className="w-4 h-4 mr-2" />
+                                        Resim Yükle
+                                    </h3>
+                                    <div className="flex items-center gap-4">
+                                        <label className={`flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded cursor-pointer transition-colors ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                                            <Upload className="w-4 h-4 text-gray-300" />
+                                            <span className="text-sm text-gray-200">{uploading ? 'Yükleniyor...' : 'Dosya Seç'}</span>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleImageUpload}
+                                                disabled={uploading}
+                                                className="hidden"
+                                            />
+                                        </label>
+                                    </div>
+
+                                    {/* Uploaded Images List */}
+                                    {uploadedImages.length > 0 && (
+                                        <div className="mt-4 space-y-2">
+                                            <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Son Yüklenenler</p>
+                                            {uploadedImages.map((img, idx) => (
+                                                <div key={idx} className="flex items-center justify-between p-2 bg-gray-800 rounded border border-gray-700">
+                                                    <div className="flex items-center gap-3 overflow-hidden">
+                                                        <img src={img.url} alt="Preview" className="w-8 h-8 object-cover rounded" />
+                                                        <span className="text-xs text-gray-400 truncate max-w-[200px]">{img.name}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xs text-gray-500 font-mono truncate max-w-[150px] hidden sm:block">{img.url}</span>
+                                                        <button
+                                                            onClick={() => copyToClipboard(`<img src="${img.url}" alt="${img.name}" class="w-full rounded-lg my-4" />`)}
+                                                            className="p-1.5 hover:bg-gray-700 rounded text-gray-400 hover:text-white transition-colors"
+                                                            title="HTML Kodunu Kopyala"
+                                                        >
+                                                            <Copy className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
                                 <textarea
                                     value={editValue}
                                     onChange={(e) => setEditValue(e.target.value)}

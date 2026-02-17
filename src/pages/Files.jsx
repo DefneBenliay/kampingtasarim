@@ -176,7 +176,7 @@ const Files = () => {
                             <Folder className="w-8 h-8 text-blue-500" />
                         ) : (
                             item.thumbnail_url ? (
-                                <img src={item.thumbnail_url} alt="" className="w-8 h-8 object-cover rounded" />
+                                <img src={item.thumbnail_url} alt="" loading="lazy" className="w-8 h-8 object-cover rounded" />
                             ) : (
                                 <FileText className="w-8 h-8 text-orange-500" />
                             )

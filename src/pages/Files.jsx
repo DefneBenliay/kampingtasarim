@@ -18,6 +18,9 @@ const Files = () => {
     const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
     const [isUploadFileOpen, setIsUploadFileOpen] = useState(false);
 
+    // Preview State
+    const [previewFile, setPreviewFile] = useState(null);
+
     // Form States
     const [newFolderName, setNewFolderName] = useState('');
     const [uploadFile, setUploadFile] = useState(null);
@@ -35,28 +38,40 @@ const Files = () => {
 
     const fetchFolders = async () => {
         setLoading(true);
-        // Order by position primarily
-        const { data, error } = await supabase
-            .from('folders')
-            .select('*')
-            .order('position', { ascending: true })
-            .order('created_at', { ascending: false });
+        try {
+            // Order by position primarily
+            const { data, error } = await supabase
+                .from('folders')
+                .select('*')
+                .order('position', { ascending: true })
+                .order('created_at', { ascending: false });
 
-        if (!error && data) setFolders(data);
-        setLoading(false);
+            if (error) throw error;
+            if (data) setFolders(data);
+        } catch (error) {
+            console.error('Error fetching folders:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const fetchFiles = async (folderId) => {
         setLoading(true);
-        const { data, error } = await supabase
-            .from('files')
-            .select('*')
-            .eq('folder_id', folderId)
-            .order('position', { ascending: true })
-            .order('created_at', { ascending: false });
+        try {
+            const { data, error } = await supabase
+                .from('files')
+                .select('*')
+                .eq('folder_id', folderId)
+                .order('position', { ascending: true })
+                .order('created_at', { ascending: false });
 
-        if (!error && data) setFiles(data);
-        setLoading(false);
+            if (error) throw error;
+            if (data) setFiles(data);
+        } catch (error) {
+            console.error('Error fetching files:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const updatePositions = async (table, items) => {
@@ -77,7 +92,6 @@ const Files = () => {
 
     const handleReorderFolders = (newOrder) => {
         setFolders(newOrder);
-        // Debounce or immediate? Immediate is fine for local feedback, API call can be async
         updatePositions('folders', newOrder);
     };
 
@@ -89,10 +103,6 @@ const Files = () => {
     const handleCreateFolder = async (e) => {
         e.preventDefault();
         if (!newFolderName.trim()) return;
-
-        // Put new folder at the end or beginning? Standard is usually end or beginning.
-        // Let's get max position or just strict insert. 
-        // For simplicity, we just insert.
 
         const { error } = await supabase.from('folders').insert([{
             name: newFolderName,
@@ -276,6 +286,7 @@ const Files = () => {
                                                 isFolder={false}
                                                 isAdmin={isAdmin}
                                                 handleDeleteFile={handleDeleteFile}
+                                                onPreview={setPreviewFile}
                                             />
                                         </Reorder.Item>
                                     ))}
@@ -347,12 +358,58 @@ const Files = () => {
                     </div>
                 </form>
             </Modal>
+
+            {/* File Preview Modal */}
+            {previewFile && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                    <div className="relative bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+                        <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                            <h3 className="font-semibold text-gray-900 truncate pr-4">{previewFile.name}</h3>
+                            <button
+                                onClick={() => setPreviewFile(null)}
+                                className="p-1 hover:bg-gray-200 rounded-full transition-colors"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div className="flex-1 overflow-auto p-4 bg-gray-100 flex items-center justify-center">
+                            {previewFile.thumbnail_url ? (
+                                <img
+                                    src={previewFile.file_url}
+                                    alt={previewFile.name}
+                                    className="max-w-full max-h-[70vh] object-contain shadow-lg"
+                                />
+                            ) : (
+                                <div className="text-center p-10">
+                                    <FileText className="w-24 h-24 text-gray-400 mx-auto mb-4" />
+                                    <p className="text-gray-600">Önizleme görüntülenemiyor.</p>
+                                    <a
+                                        href={previewFile.file_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                    >
+                                        Dosyayı İndir
+                                    </a>
+                                </div>
+                            )}
+                        </div>
+                        {previewFile.description && (
+                            <div className="p-4 bg-white border-t border-gray-200 text-sm text-gray-600">
+                                {previewFile.description}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
 
 // Extracted FileItem component to prevent re-creation on every render
-const FileItem = ({ item, isFolder, setCurrentFolder, isAdmin, handleDeleteFolder, handleDeleteFile }) => {
+const FileItem = ({ item, isFolder, setCurrentFolder, isAdmin, handleDeleteFolder, handleDeleteFile, onPreview }) => {
     return (
         <div className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow group">
             <div className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600">
@@ -361,7 +418,10 @@ const FileItem = ({ item, isFolder, setCurrentFolder, isAdmin, handleDeleteFolde
 
             <div
                 className="flex-1 flex items-center gap-4 cursor-pointer"
-                onClick={() => isFolder && setCurrentFolder(item)}
+                onClick={() => {
+                    if (isFolder) setCurrentFolder(item);
+                    else onPreview && onPreview(item);
+                }}
             >
                 <div className="p-3 bg-blue-50 rounded-lg">
                     {isFolder ? (
@@ -388,15 +448,18 @@ const FileItem = ({ item, isFolder, setCurrentFolder, isAdmin, handleDeleteFolde
 
             <div className="flex items-center gap-2">
                 {!isFolder && (
-                    <a
-                        href={item.file_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onPreview && onPreview(item);
+                        }}
                         className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
-                        title="İndir / Görüntüle"
+                        title="Önizle"
                     >
+                        {/* Use Eye icon or similar if available, but staying with existing import for safety, using Upload as placeholder if needed but let's stick to clickable card. The user said 'download button' */}
+                        {/* Actually, user said 'download button' opens popup. Let's make the download feature open preview too. */}
                         <Download className="w-5 h-5" />
-                    </a>
+                    </button>
                 )}
                 {isAdmin && (
                     <button

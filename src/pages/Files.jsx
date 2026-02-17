@@ -159,67 +159,6 @@ const Files = () => {
         (f.description && f.description.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
-    // Wrapper for reorder item to cleanly separate drag handle
-    const FileItem = ({ item, isFolder }) => {
-        return (
-            <div className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow group">
-                <div className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600">
-                    <GripVertical className="w-5 h-5" />
-                </div>
-
-                <div
-                    className="flex-1 flex items-center gap-4 cursor-pointer"
-                    onClick={() => isFolder && setCurrentFolder(item)}
-                >
-                    <div className="p-3 bg-blue-50 rounded-lg">
-                        {isFolder ? (
-                            <Folder className="w-8 h-8 text-blue-500" />
-                        ) : (
-                            item.thumbnail_url ? (
-                                <img src={item.thumbnail_url} alt="" loading="lazy" className="w-8 h-8 object-cover rounded" />
-                            ) : (
-                                <FileText className="w-8 h-8 text-orange-500" />
-                            )
-                        )}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-gray-900 break-words">{item.name}</h4>
-                        <p className="text-sm text-gray-500 break-words">
-                            {isFolder
-                                ? new Date(item.created_at).toLocaleDateString('tr-TR')
-                                : item.description || 'Açıklama yok'
-                            }
-                        </p>
-                    </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                    {!isFolder && (
-                        <a
-                            href={item.file_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
-                            title="İndir / Görüntüle"
-                        >
-                            <Download className="w-5 h-5" />
-                        </a>
-                    )}
-                    {isAdmin && (
-                        <button
-                            onClick={(e) => isFolder ? handleDeleteFolder(item.id, e) : handleDeleteFile(item.id, e)}
-                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
-                            title="Sil"
-                        >
-                            <Trash2 className="w-5 h-5" />
-                        </button>
-                    )}
-                </div>
-            </div>
-        );
-    };
-
     if (loading) return (
         <div className="flex justify-center items-center h-screen bg-gray-900 font-sans">
             <div className="text-gray-400 text-lg">Yükleniyor...</div>
@@ -305,7 +244,13 @@ const Files = () => {
                                 >
                                     {filteredFolders.map((folder) => (
                                         <Reorder.Item key={folder.id} value={folder} as="div">
-                                            <FileItem item={folder} isFolder={true} />
+                                            <FileItem
+                                                item={folder}
+                                                isFolder={true}
+                                                setCurrentFolder={setCurrentFolder}
+                                                isAdmin={isAdmin}
+                                                handleDeleteFolder={handleDeleteFolder}
+                                            />
                                         </Reorder.Item>
                                     ))}
                                 </Reorder.Group>
@@ -326,7 +271,12 @@ const Files = () => {
                                 >
                                     {filteredFiles.map((file) => (
                                         <Reorder.Item key={file.id} value={file} as="div">
-                                            <FileItem item={file} isFolder={false} />
+                                            <FileItem
+                                                item={file}
+                                                isFolder={false}
+                                                isAdmin={isAdmin}
+                                                handleDeleteFile={handleDeleteFile}
+                                            />
                                         </Reorder.Item>
                                     ))}
                                 </Reorder.Group>
@@ -400,4 +350,66 @@ const Files = () => {
         </div>
     );
 };
+
+// Extracted FileItem component to prevent re-creation on every render
+const FileItem = ({ item, isFolder, setCurrentFolder, isAdmin, handleDeleteFolder, handleDeleteFile }) => {
+    return (
+        <div className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow group">
+            <div className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600">
+                <GripVertical className="w-5 h-5" />
+            </div>
+
+            <div
+                className="flex-1 flex items-center gap-4 cursor-pointer"
+                onClick={() => isFolder && setCurrentFolder(item)}
+            >
+                <div className="p-3 bg-blue-50 rounded-lg">
+                    {isFolder ? (
+                        <Folder className="w-8 h-8 text-blue-500" />
+                    ) : (
+                        item.thumbnail_url ? (
+                            <img src={item.thumbnail_url} alt="" loading="lazy" className="w-8 h-8 object-cover rounded" />
+                        ) : (
+                            <FileText className="w-8 h-8 text-orange-500" />
+                        )
+                    )}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold text-gray-900 break-words">{item.name}</h4>
+                    <p className="text-sm text-gray-500 break-words">
+                        {isFolder
+                            ? new Date(item.created_at).toLocaleDateString('tr-TR')
+                            : item.description || 'Açıklama yok'
+                        }
+                    </p>
+                </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+                {!isFolder && (
+                    <a
+                        href={item.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+                        title="İndir / Görüntüle"
+                    >
+                        <Download className="w-5 h-5" />
+                    </a>
+                )}
+                {isAdmin && (
+                    <button
+                        onClick={(e) => isFolder ? handleDeleteFolder(item.id, e) : handleDeleteFile(item.id, e)}
+                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                        title="Sil"
+                    >
+                        <Trash2 className="w-5 h-5" />
+                    </button>
+                )}
+            </div>
+        </div>
+    );
+};
+
 export default Files;

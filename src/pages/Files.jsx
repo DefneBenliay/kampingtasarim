@@ -180,9 +180,9 @@ const Files = () => {
                         )}
                     </div>
 
-                    <div className="flex-1 overflow-hidden">
-                        <h4 className="font-semibold text-gray-900 truncate">{item.name}</h4>
-                        <p className="text-sm text-gray-500 truncate">
+                    <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-gray-900 break-words">{item.name}</h4>
+                        <p className="text-sm text-gray-500 break-words">
                             {isFolder
                                 ? new Date(item.created_at).toLocaleDateString('tr-TR')
                                 : item.description || 'Açıklama yok'

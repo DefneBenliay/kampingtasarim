@@ -14,17 +14,23 @@ export const AuthProvider = ({ children }) => {
         let mounted = true;
 
         // Safety timeout to prevent infinite loading
-        const timeoutId = setTimeout(() => {
+        const timeoutId = setTimeout(async () => {
             if (mounted && loading) {
-                console.warn('Auth session load timed out. Forcing app load.');
+                console.warn('Auth session load timed out. Clearing session and forcing app load.');
+                // Clear potentially corrupted session data
+                await supabase.auth.signOut();
+                localStorage.removeItem('sb-kampingtasarim-auth-token'); // Attempt to clear specific token if known, or rely on signOut
                 setLoading(false);
             }
-        }, 5000); // 5 seconds timeout
+        }, 3000); // Reduced to 3 seconds for better UX
 
         // Check active session
         const getSession = async () => {
             try {
+                console.time('AuthCheck');
                 const { data: { session }, error } = await supabase.auth.getSession();
+                console.timeEnd('AuthCheck');
+
                 if (error) throw error;
 
                 if (mounted) {
@@ -38,6 +44,7 @@ export const AuthProvider = ({ children }) => {
             } catch (error) {
                 console.error('Error checking session:', error);
                 if (mounted) {
+                    await supabase.auth.signOut(); // Ensure clean state on error
                     setUser(null);
                     setRole(null);
                     setLoading(false);
@@ -96,7 +103,16 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider value={{ user, role, signOut, loading, isAdmin: role === 'admin' }}>
-            {!loading && children}
+            {loading ? (
+                <div className="flex justify-center items-center h-screen bg-gray-900 font-sans">
+                    <div className="flex flex-col items-center gap-4">
+                        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        <div className="text-gray-400 text-sm">Oturum kontrol ediliyor...</div>
+                    </div>
+                </div>
+            ) : (
+                children
+            )}
         </AuthContext.Provider>
     );
 };

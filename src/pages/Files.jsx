@@ -154,7 +154,10 @@ const Files = () => {
     };
 
     const filteredFolders = folders.filter(f => f.name.toLowerCase().includes(searchTerm.toLowerCase()));
-    const filteredFiles = files.filter(f => f.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    const filteredFiles = files.filter(f =>
+        f.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (f.description && f.description.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
 
     // Wrapper for reorder item to cleanly separate drag handle
     const FileItem = ({ item, isFolder }) => {

@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './components/AuthProvider';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Lazy load pages for performance optimization
 const Login = lazy(() => import('./pages/Login'));
@@ -35,23 +36,25 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <Suspense fallback={<LoadingFallback />}>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+        <ErrorBoundary>
+          <Suspense fallback={<LoadingFallback />}>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
 
-            {/* Public Routes (for logged-in users) */}
-            <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-            <Route path="/info" element={<ProtectedRoute><Info /></ProtectedRoute>} />
-            <Route path="/files" element={<ProtectedRoute><Files /></ProtectedRoute>} />
+              {/* Public Routes (for logged-in users) */}
+              <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+              <Route path="/info" element={<ProtectedRoute><Info /></ProtectedRoute>} />
+              <Route path="/files" element={<ProtectedRoute><Files /></ProtectedRoute>} />
 
-            {/* Admin Routes */}
-            <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
-              <Route path="users" element={<Users />} />
-              {/* Add other admin sub-routes if needed, but managing content is done on the pages themselves usually */}
-            </Route>
-          </Routes>
-        </Suspense>
+              {/* Admin Routes */}
+              <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+                <Route path="users" element={<Users />} />
+                {/* Add other admin sub-routes if needed, but managing content is done on the pages themselves usually */}
+              </Route>
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
       </Router>
     </AuthProvider>
   );

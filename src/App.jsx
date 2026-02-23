@@ -52,6 +52,8 @@ function App() {
                 <Route path="users" element={<Users />} />
                 {/* Add other admin sub-routes if needed, but managing content is done on the pages themselves usually */}
               </Route>
+              {/* Catch-all Route: Redirect unknown pages to/login */}
+              <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
           </Suspense>
         </ErrorBoundary>

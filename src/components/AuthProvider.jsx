@@ -109,6 +109,30 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const handleBypass = async () => {
+        console.warn('Manual bypass triggered - clearing state and redirecting');
+
+        // Clear Supabase session from localStorage
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && (key.includes('sb-') || key.includes('supabase'))) {
+                localStorage.removeItem(key);
+            }
+        }
+
+        // Reset state
+        setUser(null);
+        setRole(null);
+        setLoading(false);
+
+        // Attempt non-blocking signOut
+        try {
+            supabase.auth.signOut();
+        } catch (e) {
+            console.error('Bypass signOut failed:', e);
+        }
+    };
+
     const signOut = async () => {
         await supabase.auth.signOut();
         setRole(null);
@@ -131,7 +155,7 @@ export const AuthProvider = ({ children }) => {
                                     Oturum kontrolü beklenenden uzun sürüyor.
                                 </p>
                                 <button
-                                    onClick={() => setLoading(false)}
+                                    onClick={handleBypass}
                                     className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors underline underline-offset-4"
                                 >
                                     Giriş sayfasına geçmek için tıklayın

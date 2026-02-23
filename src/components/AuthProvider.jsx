@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { supabase } from '../supabaseClient';
 
 const AuthContext = createContext({});
@@ -9,20 +9,34 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [role, setRole] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [showBypass, setShowBypass] = useState(false);
+    const loadingRef = useRef(true);
+
+    // Sync ref with state
+    useEffect(() => {
+        loadingRef.current = loading;
+    }, [loading]);
 
     useEffect(() => {
         let mounted = true;
 
         // Safety timeout to prevent infinite loading
         const timeoutId = setTimeout(async () => {
-            if (mounted && loading) {
-                console.warn('Auth session load timed out. Clearing session and forcing app load.');
-                // Clear potentially corrupted session data
-                await supabase.auth.signOut();
-                localStorage.removeItem('sb-kampingtasarim-auth-token'); // Attempt to clear specific token if known, or rely on signOut
-                setLoading(false);
+            if (mounted && loadingRef.current) {
+                console.warn('Auth session load timed out - showing bypass option');
+                setShowBypass(true);
+
+                // After 10 seconds total, force close loading if it's still stuck
+                const forceCloseTimeout = setTimeout(() => {
+                    if (mounted && loadingRef.current) {
+                        console.warn('Forcing app load after 10s hang');
+                        setLoading(false);
+                    }
+                }, 7000);
+
+                return () => clearTimeout(forceCloseTimeout);
             }
-        }, 3000); // Reduced to 3 seconds for better UX
+        }, 3000);
 
         // Check active session
         const getSession = async () => {
@@ -105,9 +119,25 @@ export const AuthProvider = ({ children }) => {
         <AuthContext.Provider value={{ user, role, signOut, loading, isAdmin: role === 'admin' }}>
             {loading ? (
                 <div className="flex justify-center items-center h-screen bg-gray-900 font-sans">
-                    <div className="flex flex-col items-center gap-4">
-                        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                        <div className="text-gray-400 text-sm">Oturum kontrol ediliyor...</div>
+                    <div className="flex flex-col items-center gap-6">
+                        <div className="flex flex-col items-center gap-4">
+                            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                            <div className="text-gray-400 text-sm">Oturum kontrol ediliyor...</div>
+                        </div>
+
+                        {showBypass && (
+                            <div className="flex flex-col items-center gap-2 animate-fade-in">
+                                <p className="text-gray-500 text-xs text-center px-4">
+                                    Oturum kontrolü beklenenden uzun sürüyor.
+                                </p>
+                                <button
+                                    onClick={() => setLoading(false)}
+                                    className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors underline underline-offset-4"
+                                >
+                                    Giriş sayfasına geçmek için tıklayın
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             ) : (

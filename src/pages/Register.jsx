@@ -46,28 +46,28 @@ const Register = () => {
     };
 
     return (
-        <div style={{ 
-            minHeight: '100vh', 
-            width: '100%', 
-            display: 'flex', 
-            alignItems: 'center', 
+        <div style={{
+            minHeight: '100vh',
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
             justifyContent: 'center',
             backgroundColor: '#f5f5f5',
             fontFamily: 'system-ui, -apple-system, sans-serif'
         }}>
             <div style={{ width: '100%', maxWidth: '400px', margin: '0 16px' }}>
-                <div style={{ 
-                    backgroundColor: '#fff', 
-                    padding: '32px', 
-                    borderRadius: '8px', 
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)' 
+                <div style={{
+                    backgroundColor: '#fff',
+                    padding: '32px',
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
                 }}>
                     {/* Header */}
                     <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-                        <h1 style={{ 
-                            fontSize: '24px', 
-                            fontWeight: 'bold', 
-                            color: '#333', 
+                        <h1 style={{
+                            fontSize: '24px',
+                            fontWeight: 'bold',
+                            color: '#333',
                             marginBottom: '8px',
                             margin: '0 0 8px 0'
                         }}>
@@ -96,12 +96,12 @@ const Register = () => {
                     {/* Form */}
                     <form onSubmit={handleRegister}>
                         <div style={{ marginBottom: '16px' }}>
-                            <label htmlFor="fullName" style={{ 
-                                display: 'block', 
-                                marginBottom: '8px', 
-                                color: '#333', 
-                                fontSize: '14px', 
-                                fontWeight: '500' 
+                            <label htmlFor="fullName" style={{
+                                display: 'block',
+                                marginBottom: '8px',
+                                color: '#333',
+                                fontSize: '14px',
+                                fontWeight: '500'
                             }}>
                                 Ad Soyad
                             </label>
@@ -110,14 +110,16 @@ const Register = () => {
                                 id="fullName"
                                 value={fullName}
                                 onChange={(e) => setFullName(e.target.value)}
-                                style={{ 
+                                style={{
                                     width: '100%',
                                     padding: '8px 12px',
                                     border: '1px solid #ddd',
                                     borderRadius: '4px',
                                     fontSize: '14px',
                                     outline: 'none',
-                                    boxSizing: 'border-box'
+                                    boxSizing: 'border-box',
+                                    color: '#333',
+                                    backgroundColor: '#fff'
                                 }}
                                 onFocus={(e) => e.target.style.borderColor = '#007bff'}
                                 onBlur={(e) => e.target.style.borderColor = '#ddd'}
@@ -127,12 +129,12 @@ const Register = () => {
                         </div>
 
                         <div style={{ marginBottom: '16px' }}>
-                            <label htmlFor="email" style={{ 
-                                display: 'block', 
-                                marginBottom: '8px', 
-                                color: '#333', 
-                                fontSize: '14px', 
-                                fontWeight: '500' 
+                            <label htmlFor="email" style={{
+                                display: 'block',
+                                marginBottom: '8px',
+                                color: '#333',
+                                fontSize: '14px',
+                                fontWeight: '500'
                             }}>
                                 Email Adresi
                             </label>
@@ -141,14 +143,16 @@ const Register = () => {
                                 id="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                style={{ 
+                                style={{
                                     width: '100%',
                                     padding: '8px 12px',
                                     border: '1px solid #ddd',
                                     borderRadius: '4px',
                                     fontSize: '14px',
                                     outline: 'none',
-                                    boxSizing: 'border-box'
+                                    boxSizing: 'border-box',
+                                    color: '#333',
+                                    backgroundColor: '#fff'
                                 }}
                                 onFocus={(e) => e.target.style.borderColor = '#007bff'}
                                 onBlur={(e) => e.target.style.borderColor = '#ddd'}
@@ -158,12 +162,12 @@ const Register = () => {
                         </div>
 
                         <div style={{ marginBottom: '16px' }}>
-                            <label htmlFor="password" style={{ 
-                                display: 'block', 
-                                marginBottom: '8px', 
-                                color: '#333', 
-                                fontSize: '14px', 
-                                fontWeight: '500' 
+                            <label htmlFor="password" style={{
+                                display: 'block',
+                                marginBottom: '8px',
+                                color: '#333',
+                                fontSize: '14px',
+                                fontWeight: '500'
                             }}>
                                 Şifre
                             </label>
@@ -172,14 +176,16 @@ const Register = () => {
                                 id="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                style={{ 
+                                style={{
                                     width: '100%',
                                     padding: '8px 12px',
                                     border: '1px solid #ddd',
                                     borderRadius: '4px',
                                     fontSize: '14px',
                                     outline: 'none',
-                                    boxSizing: 'border-box'
+                                    boxSizing: 'border-box',
+                                    color: '#333',
+                                    backgroundColor: '#fff'
                                 }}
                                 onFocus={(e) => e.target.style.borderColor = '#007bff'}
                                 onBlur={(e) => e.target.style.borderColor = '#ddd'}
@@ -190,12 +196,12 @@ const Register = () => {
                         </div>
 
                         <div style={{ marginBottom: '24px' }}>
-                            <label htmlFor="confirmPassword" style={{ 
-                                display: 'block', 
-                                marginBottom: '8px', 
-                                color: '#333', 
-                                fontSize: '14px', 
-                                fontWeight: '500' 
+                            <label htmlFor="confirmPassword" style={{
+                                display: 'block',
+                                marginBottom: '8px',
+                                color: '#333',
+                                fontSize: '14px',
+                                fontWeight: '500'
                             }}>
                                 Şifre Tekrar
                             </label>
@@ -204,14 +210,16 @@ const Register = () => {
                                 id="confirmPassword"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
-                                style={{ 
+                                style={{
                                     width: '100%',
                                     padding: '8px 12px',
                                     border: '1px solid #ddd',
                                     borderRadius: '4px',
                                     fontSize: '14px',
                                     outline: 'none',
-                                    boxSizing: 'border-box'
+                                    boxSizing: 'border-box',
+                                    color: '#333',
+                                    backgroundColor: '#fff'
                                 }}
                                 onFocus={(e) => e.target.style.borderColor = '#007bff'}
                                 onBlur={(e) => e.target.style.borderColor = '#ddd'}
@@ -224,7 +232,7 @@ const Register = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            style={{ 
+                            style={{
                                 width: '100%',
                                 padding: '10px 16px',
                                 borderRadius: '4px',
@@ -243,19 +251,19 @@ const Register = () => {
                         </button>
                     </form>
 
-                    <div style={{ 
-                        marginTop: '24px', 
-                        textAlign: 'center', 
-                        fontSize: '14px', 
-                        color: '#666' 
+                    <div style={{
+                        marginTop: '24px',
+                        textAlign: 'center',
+                        fontSize: '14px',
+                        color: '#666'
                     }}>
                         Zaten hesabınız var mı?{' '}
-                        <Link 
-                            to="/login" 
-                            style={{ 
-                                color: '#007bff', 
-                                textDecoration: 'none', 
-                                fontWeight: '500' 
+                        <Link
+                            to="/login"
+                            style={{
+                                color: '#007bff',
+                                textDecoration: 'none',
+                                fontWeight: '500'
                             }}
                             onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
                             onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
